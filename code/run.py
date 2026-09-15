@@ -54,7 +54,7 @@ for i in range(max_output_index):
 print('  loading physical forcing')
 
 # Specify number of vertical levels
-kmax = 18
+kmax = 26
 
 # open file for ocean physics
 ds             = xr.open_dataset(oce_phys_file)
@@ -89,10 +89,13 @@ forcing_matrix_salinity   = ds.so.values
 # Mixed layer depth [m]
 forcing_matrix_mld        = ds.mlotst.values
 
+ds_solar = xr.open_dataset(solar_file)
 # Downward flux of shortwave light at sea surface [W/m2]
-forcing_matrix_light_at_top  = pd.read_csv(solar_file,header=0,usecols=[5])
+forcing_matrix_light_at_top  = ds_solar.msdwswrf.values
+
+ds_wind = xr.open_dataarray(wind_file)
 # Wind speed [m/s]
-forcing_matrix_wind  = pd.read_csv(wind_file,header=0,usecols=[5])
+forcing_matrix_wind  = ds_wind.values
 
 # Bottom stress [N/m2]
 forcing_matrix_bottom_stress = load_vector('physics/bottom_stress.txt')

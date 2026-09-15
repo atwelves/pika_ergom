@@ -3,15 +3,15 @@ import numpy as np
 
 def configure():
     global run_id
-    run_id             = 'ctrl'
+    run_id             = 'variable_sinking_speed'
     global bgc_input_file
-    bgc_input_file     = 'init/cmems_station_Utö_bgc_2020.nc'
+    bgc_input_file     = 'init/cmems_GF1_2020.nc'
     global oce_phys_file
-    oce_phys_file    = 'physics/cmems_station_Utö_2020.nc'
+    oce_phys_file    = 'physics/cmems_GF1_2020.nc'
     global wind_file
-    wind_file          = 'physics/wind_Utö_2020.csv'
+    wind_file          = 'physics/era5_winds_GF1_2020.nc'
     global solar_file
-    solar_file         = 'physics/shortwave_Utö_2020.csv'
+    solar_file         = 'physics/era5_shortwave_GF1_2020.nc'
     global start_date    
     start_date         = (dt.date(2020,1,1) - dt.date(1899,12,30)).days  # start date
     global end_date
