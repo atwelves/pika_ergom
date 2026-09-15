@@ -3,7 +3,7 @@ import numpy as np
 
 def configure():
     global run_id
-    run_id             = 'variable_sinking_speed'
+    run_id             = 'ctrl'
     global bgc_input_file
     bgc_input_file     = 'init/cmems_GF1_2020.nc'
     global oce_phys_file
