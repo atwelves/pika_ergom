@@ -54,7 +54,7 @@ for i in range(max_output_index):
 print('  loading physical forcing')
 
 # Specify number of vertical levels
-kmax = 26
+#kmax = 24
 
 # open file for ocean physics
 ds             = xr.open_dataset(oce_phys_file)
