@@ -112,6 +112,7 @@ def cgt_bio_timestep():
             cgt_timestep   = timestep                                  # timestep                  [days]
             cgt_longitude  = location_longitude                        # geographic longitude      [deg]
             cgt_latitude   = location_latitude                         # geographic latitude       [deg]
+            cgt_dTdz       = dTdZ[k]                               # detrital sinking speed scaling factor []
             if (k == kmax-1):
                 cgt_current_wave_stress=forcing_scalar_bottom_stress    # bottom stress             [N/m2]
                                    
