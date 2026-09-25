@@ -190,6 +190,7 @@ def cgt_bio_timestep():
             cgt_timestep   = timestep                                  # timestep                  [days]
             cgt_longitude  = location_longitude                        # geographic longitude      [deg]
             cgt_latitude   = location_latitude                         # geographic latitude       [deg]
+            cgt_dTdz       = dTdZ[k]                               # detrital sinking speed scaling factor []
             if (k == kmax-1):
                 cgt_current_wave_stress=forcing_scalar_bottom_stress    # bottom stress             [N/m2]
                                    
@@ -657,6 +658,12 @@ def cgt_bio_timestep():
             # depth dependent POCP sinking speed :
             w_pocp_var      = -0.15                          
              
+            # Variable detrital sinking speed :
+            temp1  = -min(cgt_dTdz,0)               
+            temp2  = temp1/(temp1 + K_sink)         
+            temp3  = (1-temp1)*(1-temp1)            
+            w_det           = w_det_mixed*temp3              
+             
 
             if (k == kmax-1):
                 cgt_dummyvar = 0.0
@@ -798,8 +805,8 @@ def cgt_bio_timestep():
             lim_t_nh4_11         = theta(t_nh4-0.0) 
             lim_t_no3_1          = 1.0-exp(-t_no3/no3_min_det_denit) 
             lim_t_no3_3          = t_no3*t_no3/(t_no3*t_no3+no3_min_sed_denit*no3_min_sed_denit) 
-            lim_t_no3_9          = theta(t_no3-0.0) 
-            lim_t_po4_10         = theta(t_po4-0.0) 
+            lim_t_no3_10         = theta(t_no3-0.0) 
+            lim_t_po4_9          = theta(t_po4-0.0) 
             lim_t_spp_16         = theta(t_spp-0.0) 
             lim_t_zoo_19         = theta(t_zoo-0.0) 
             lim_t_h2s_5          = theta(t_h2s-h2s_min_po4_liber) 
@@ -952,31 +959,31 @@ def cgt_bio_timestep():
                 # STEP 6.1: calculate process rates
                 #------------------------------------
                 # assimilation of nitrate by large-cell phytoplankton :
-                p_no3_assim_lpp = (lpp_plus_lpp0*lr_assim_lpp*t_no3/(din+epsilon))*lim_t_no3_9*lim_t_po4_10*lim_t_dic_8 
+                p_no3_assim_lpp = (lpp_plus_lpp0*lr_assim_lpp*t_no3/(din+epsilon))*lim_t_dic_8*lim_t_po4_9*lim_t_no3_10 
                 p_no3_assim_lpp = max(p_no3_assim_lpp,0.0) 
 
                 # assimilation of ammonium by large-cell phytoplankton :
-                p_nh4_assim_lpp = (lpp_plus_lpp0*lr_assim_lpp*t_nh4/(din+epsilon))*lim_t_dic_8*lim_t_po4_10*lim_t_nh4_11 
+                p_nh4_assim_lpp = (lpp_plus_lpp0*lr_assim_lpp*t_nh4/(din+epsilon))*lim_t_nh4_11*lim_t_po4_9*lim_t_dic_8 
                 p_nh4_assim_lpp = max(p_nh4_assim_lpp,0.0) 
 
                 # assimilation of nitrate by small-cell phytoplankton :
-                p_no3_assim_spp = (spp_plus_spp0*lr_assim_spp*t_no3/(din+epsilon))*lim_t_no3_9*lim_t_po4_10*lim_t_dic_8 
+                p_no3_assim_spp = (spp_plus_spp0*lr_assim_spp*t_no3/(din+epsilon))*lim_t_dic_8*lim_t_po4_9*lim_t_no3_10 
                 p_no3_assim_spp = max(p_no3_assim_spp,0.0) 
 
                 # assimilation of ammonium by small-cell phytoplankton :
-                p_nh4_assim_spp = (spp_plus_spp0*lr_assim_spp*t_nh4/(din+epsilon))*lim_t_dic_8*lim_t_po4_10*lim_t_nh4_11 
+                p_nh4_assim_spp = (spp_plus_spp0*lr_assim_spp*t_nh4/(din+epsilon))*lim_t_nh4_11*lim_t_po4_9*lim_t_dic_8 
                 p_nh4_assim_spp = max(p_nh4_assim_spp,0.0) 
 
                 # assimilation of ammonium by limnic phytoplankton :
-                p_nh4_assim_lip = (lip_plus_lip0*lr_assim_lip*t_nh4/(din+epsilon))*lim_t_nh4_11*lim_t_po4_10*lim_t_dic_8 
+                p_nh4_assim_lip = (lip_plus_lip0*lr_assim_lip*t_nh4/(din+epsilon))*lim_t_dic_8*lim_t_po4_9*lim_t_nh4_11 
                 p_nh4_assim_lip = max(p_nh4_assim_lip,0.0) 
 
                 # assimilation of nitrate by limnic phytoplankton :
-                p_no3_assim_lip = (lip_plus_lip0*lr_assim_lip*t_no3/(din+epsilon))*lim_t_dic_8*lim_t_po4_10*lim_t_no3_9 
+                p_no3_assim_lip = (lip_plus_lip0*lr_assim_lip*t_no3/(din+epsilon))*lim_t_no3_10*lim_t_po4_9*lim_t_dic_8 
                 p_no3_assim_lip = max(p_no3_assim_lip,0.0) 
 
                 # fixation of dinitrogen by diazotroph cyanobacteria :
-                p_n2_assim_cya  = (cya_plus_cya0*lr_assim_cya)*lim_t_dic_8*lim_t_po4_10*lim_t_n2_7 
+                p_n2_assim_cya  = (cya_plus_cya0*lr_assim_cya)*lim_t_n2_7*lim_t_po4_9*lim_t_dic_8 
                 p_n2_assim_cya  = max(p_n2_assim_cya ,0.0) 
 
                 # Production of DOC by LIP :
@@ -996,39 +1003,39 @@ def cgt_bio_timestep():
                 p_assim_cya_doc = max(p_assim_cya_doc,0.0) 
 
                 # Production of DOP by LPP :
-                p_assim_lpp_dop = (rfr_p * t_lpp * lr_assim_lpp_dop)*lim_t_po4_10*lim_t_dic_8 
+                p_assim_lpp_dop = (rfr_p * t_lpp * lr_assim_lpp_dop)*lim_t_dic_8*lim_t_po4_9 
                 p_assim_lpp_dop = max(p_assim_lpp_dop,0.0) 
 
                 # Production of DOP by SPP :
-                p_assim_spp_dop = (rfr_p * t_spp * lr_assim_spp_dop)*lim_t_dic_8*lim_t_po4_10 
+                p_assim_spp_dop = (rfr_p * t_spp * lr_assim_spp_dop)*lim_t_po4_9*lim_t_dic_8 
                 p_assim_spp_dop = max(p_assim_spp_dop,0.0) 
 
                 # Production of DOP by LIP :
-                p_assim_lip_dop = (rfr_p * t_lip * lr_assim_lip_dop)*lim_t_po4_10*lim_t_dic_8 
+                p_assim_lip_dop = (rfr_p * t_lip * lr_assim_lip_dop)*lim_t_dic_8*lim_t_po4_9 
                 p_assim_lip_dop = max(p_assim_lip_dop,0.0) 
 
                 # Production of DON by LPP :
-                p_nh4_assim_lpp_don = (t_lpp * lr_assim_lpp_don*t_nh4/(din+epsilon))*lim_t_dic_8*lim_t_nh4_11 
+                p_nh4_assim_lpp_don = (t_lpp * lr_assim_lpp_don*t_nh4/(din+epsilon))*lim_t_nh4_11*lim_t_dic_8 
                 p_nh4_assim_lpp_don = max(p_nh4_assim_lpp_don,0.0) 
 
                 # Production of DON by LPP :
-                p_no3_assim_lpp_don = (t_lpp * lr_assim_lpp_don*t_no3/(din+epsilon))*lim_t_no3_9*lim_t_dic_8 
+                p_no3_assim_lpp_don = (t_lpp * lr_assim_lpp_don*t_no3/(din+epsilon))*lim_t_dic_8*lim_t_no3_10 
                 p_no3_assim_lpp_don = max(p_no3_assim_lpp_don,0.0) 
 
                 # Production of DON by SPP :
-                p_nh4_assim_spp_don = (t_spp * lr_assim_spp_don*t_nh4/(din+epsilon))*lim_t_nh4_11*lim_t_dic_8 
+                p_nh4_assim_spp_don = (t_spp * lr_assim_spp_don*t_nh4/(din+epsilon))*lim_t_dic_8*lim_t_nh4_11 
                 p_nh4_assim_spp_don = max(p_nh4_assim_spp_don,0.0) 
 
                 # Production of DON by SPP :
-                p_no3_assim_spp_don = (t_spp * lr_assim_spp_don*t_no3/(din+epsilon))*lim_t_dic_8*lim_t_no3_9 
+                p_no3_assim_spp_don = (t_spp * lr_assim_spp_don*t_no3/(din+epsilon))*lim_t_no3_10*lim_t_dic_8 
                 p_no3_assim_spp_don = max(p_no3_assim_spp_don,0.0) 
 
                 # Production of DON by LIP :
-                p_nh4_assim_lip_don = (t_lip * lr_assim_lip_don*t_nh4/(din+epsilon))*lim_t_nh4_11*lim_t_dic_8 
+                p_nh4_assim_lip_don = (t_lip * lr_assim_lip_don*t_nh4/(din+epsilon))*lim_t_dic_8*lim_t_nh4_11 
                 p_nh4_assim_lip_don = max(p_nh4_assim_lip_don,0.0) 
 
                 # Production of DON by LIP :
-                p_no3_assim_lip_don = (t_lip * lr_assim_lip_don*t_no3/(din+epsilon))*lim_t_dic_8*lim_t_no3_9 
+                p_no3_assim_lip_don = (t_lip * lr_assim_lip_don*t_no3/(din+epsilon))*lim_t_no3_10*lim_t_dic_8 
                 p_no3_assim_lip_don = max(p_no3_assim_lip_don,0.0) 
 
                 # respiration of POC :
@@ -1076,7 +1083,7 @@ def cgt_bio_timestep():
                 p_spp_graz_zoo  = max(p_spp_graz_zoo ,0.0) 
 
                 # grazing of zooplankton eating diazotroph cyanobacteria :
-                p_cya_graz_zoo  = ((t_zoo+zoo0)*lr_graz_zoo*(0.5*t_cya)/max(food_zoo,epsilon))*lim_t_cya_17
+                p_cya_graz_zoo  = ((t_zoo+zoo0)*lr_graz_zoo*(0.5*t_cya)/max(food_zoo,epsilon))*lim_t_cya_17 
                 p_cya_graz_zoo  = max(p_cya_graz_zoo ,0.0) 
 
                 # grazing of zooplankton eating limnic phytoplankton :
@@ -1084,23 +1091,23 @@ def cgt_bio_timestep():
                 p_lip_graz_zoo  = max(p_lip_graz_zoo ,0.0) 
 
                 # respiration of large-cell phytoplankton :
-                p_lpp_resp_nh4  = (t_lpp*r_lpp_resp)*lim_t_lpp_15*lim_t_o2_2 
+                p_lpp_resp_nh4  = (t_lpp*r_lpp_resp)*lim_t_o2_2*lim_t_lpp_15 
                 p_lpp_resp_nh4  = max(p_lpp_resp_nh4 ,0.0) 
 
                 # respiration of small-cell phytoplankton :
-                p_spp_resp_nh4  = (t_spp*r_spp_resp)*lim_t_o2_2*lim_t_spp_16 
+                p_spp_resp_nh4  = (t_spp*r_spp_resp)*lim_t_spp_16*lim_t_o2_2 
                 p_spp_resp_nh4  = max(p_spp_resp_nh4 ,0.0) 
 
                 # respiration of limnic phytoplankton :
-                p_lip_resp_nh4  = (t_lip*r_lip_resp)*lim_t_o2_2*lim_t_lip_18 
+                p_lip_resp_nh4  = (t_lip*r_lip_resp)*lim_t_lip_18*lim_t_o2_2 
                 p_lip_resp_nh4  = max(p_lip_resp_nh4 ,0.0) 
 
                 # respiration of diazotroph cyanobacteria :
-                p_cya_resp_nh4  = (t_cya*r_cya_resp)*lim_t_o2_2*lim_t_cya_17 
+                p_cya_resp_nh4  = (t_cya*r_cya_resp)*lim_t_cya_17*lim_t_o2_2 
                 p_cya_resp_nh4  = max(p_cya_resp_nh4 ,0.0) 
 
                 # respiration of zooplankton :
-                p_zoo_resp_nh4  = (zoo_eff*r_zoo_resp)*lim_t_o2_2*lim_t_zoo_19 
+                p_zoo_resp_nh4  = (zoo_eff*r_zoo_resp)*lim_t_zoo_19*lim_t_o2_2 
                 p_zoo_resp_nh4  = max(p_zoo_resp_nh4 ,0.0) 
 
                 # mortality of large-cell phytoplankton :
@@ -1120,7 +1127,6 @@ def cgt_bio_timestep():
                 p_cya_mort_det  = max(p_cya_mort_det ,0.0) 
 
                 # mortality of diazotroph cyanobacteria due to strong turbulence :
-                # ~~~ pika-ERGOM ~~~ Now uses threshold based on min. temperature, not max. turbulence
                 p_cya_mort_det_diff = (t_cya*r_pp_mort*(r_cya_mort_diff*theta(r_cya_mort_thresh-cgt_temp)))*lim_t_cya_17 
                 p_cya_mort_det_diff = max(p_cya_mort_det_diff,0.0) 
 
@@ -1129,7 +1135,7 @@ def cgt_bio_timestep():
                 p_zoo_mort_det  = max(p_zoo_mort_det ,0.0) 
 
                 # nitrification :
-                p_nh4_nit_no3   = (t_nh4*r_nh4_nitrif*exp(q10_nit*cgt_temp))*lim_t_nh4_11*lim_t_o2_2 
+                p_nh4_nit_no3   = (t_nh4*r_nh4_nitrif*exp(q10_nit*cgt_temp))*lim_t_o2_2*lim_t_nh4_11 
                 p_nh4_nit_no3   = max(p_nh4_nit_no3  ,0.0) 
 
                 # recycling of detritus using oxygen (respiration) :
@@ -1145,19 +1151,19 @@ def cgt_bio_timestep():
                 p_det_sulf_nh4  = max(p_det_sulf_nh4 ,0.0) 
 
                 # oxidation of hydrogen sulfide with oxygen :
-                p_h2s_oxo2_sul  = (t_h2s*t_o2*k_h2s_o2*exp(q10_h2s*cgt_temp))*lim_t_o2_2*lim_t_h2s_24 
+                p_h2s_oxo2_sul  = (t_h2s*t_o2*k_h2s_o2*exp(q10_h2s*cgt_temp))*lim_t_h2s_24*lim_t_o2_2 
                 p_h2s_oxo2_sul  = max(p_h2s_oxo2_sul ,0.0) 
 
                 # oxidation of hydrogen sulfide with nitrate :
-                p_h2s_oxno3_sul = (t_h2s*t_no3*k_h2s_no3*exp(q10_h2s*cgt_temp))*lim_t_h2s_24*lim_t_no3_9 
+                p_h2s_oxno3_sul = (t_h2s*t_no3*k_h2s_no3*exp(q10_h2s*cgt_temp))*lim_t_no3_10*lim_t_h2s_24 
                 p_h2s_oxno3_sul = max(p_h2s_oxno3_sul,0.0) 
 
                 # oxidation of elemental sulfur with oxygen :
-                p_sul_oxo2_so4  = (t_sul*t_o2*k_sul_o2*exp(q10_h2s*cgt_temp))*lim_t_sul_25*lim_t_o2_2 
+                p_sul_oxo2_so4  = (t_sul*t_o2*k_sul_o2*exp(q10_h2s*cgt_temp))*lim_t_o2_2*lim_t_sul_25 
                 p_sul_oxo2_so4  = max(p_sul_oxo2_so4 ,0.0) 
 
                 # oxidation of elemental sulfur with nitrate :
-                p_sul_oxno3_so4 = (t_sul*t_no3*k_sul_no3*exp(q10_h2s*cgt_temp))*lim_t_sul_25*lim_t_no3_9 
+                p_sul_oxno3_so4 = (t_sul*t_no3*k_sul_no3*exp(q10_h2s*cgt_temp))*lim_t_no3_10*lim_t_sul_25 
                 p_sul_oxno3_so4 = max(p_sul_oxno3_so4,0.0) 
 
                 # particle formation from DOC :
@@ -1216,7 +1222,7 @@ def cgt_bio_timestep():
                 if (k == kmax-1):
                     cgt_dummyvar = 0.0
                     # recycling of sedimentary detritus to ammonium using oxygen (respiration) :
-                    p_sed_resp_nh4  = (lr_sed_rec*sed_active)*lim_t_sed_21*lim_t_o2_2 
+                    p_sed_resp_nh4  = (lr_sed_rec*sed_active)*lim_t_o2_2*lim_t_sed_21 
                     p_sed_resp_nh4  = max(p_sed_resp_nh4 ,0.0) 
                 
                     # recycling of sedimentary detritus to ammonium using nitrate (denitrification) :
@@ -1228,7 +1234,7 @@ def cgt_bio_timestep():
                     p_sed_sulf_nh4  = max(p_sed_sulf_nh4 ,0.0) 
                 
                     # recycling of sedimentary poc to dic using oxygen (respiration) :
-                    p_sed_poc_resp  = (lr_sed_poc_rec*poc_active)*lim_t_sed_poc_22*lim_t_o2_2 
+                    p_sed_poc_resp  = (lr_sed_poc_rec*poc_active)*lim_t_o2_2*lim_t_sed_poc_22 
                     p_sed_poc_resp  = max(p_sed_poc_resp ,0.0) 
                 
                     # recycling of sedimentary poc to dic using nitrate (denitrification) :
@@ -1240,7 +1246,7 @@ def cgt_bio_timestep():
                     p_sed_poc_sulf  = max(p_sed_poc_sulf ,0.0) 
                 
                     # retention of phosphate in the sediment under oxic conditions :
-                    p_po4_retent_ips = (p_sed_resp_nh4*frac_po4retent)*lim_t_o2_4*lim_t_po4_10 
+                    p_po4_retent_ips = (p_sed_resp_nh4*frac_po4retent)*lim_t_o2_4*lim_t_po4_9 
                     p_po4_retent_ips = max(p_po4_retent_ips,0.0) 
                 
                     # liberation of phosphate from the sediment under anoxic conditions :
@@ -1328,11 +1334,11 @@ def cgt_bio_timestep():
                     p_pocp_burial   = max(p_pocp_burial  ,0.0) 
                 
                     # recycling of sedimentary pocn to dic and NH4 using oxygen (respiration) :
-                    p_sed_pocn_resp = (lr_sed_rec*pocn_active)*lim_t_o2_2*lim_t_sed_pocn_27 
+                    p_sed_pocn_resp = (lr_sed_rec*pocn_active)*lim_t_sed_pocn_27*lim_t_o2_2 
                     p_sed_pocn_resp = max(p_sed_pocn_resp,0.0) 
                 
                     # recycling of sedimentary pocp to dic and PO4 using oxygen (respiration) :
-                    p_sed_pocp_resp = (lr_sed_rec*pocp_active)*lim_t_sed_pocp_28*lim_t_o2_2 
+                    p_sed_pocp_resp = (lr_sed_rec*pocp_active)*lim_t_o2_2*lim_t_sed_pocp_28 
                     p_sed_pocp_resp = max(p_sed_pocp_resp,0.0) 
                 
                     # recycling of sedimentary pocn to dic and NH4 using nitrate (denitrification) :
@@ -1356,7 +1362,7 @@ def cgt_bio_timestep():
                     p_alk_btf       = max(p_alk_btf      ,0.0) 
                 
                     # coupled nitrification and denitrification after mineralization of detritus in oxic sediments :
-                    p_nh4_nitdenit_n2 = (frac_denit_sed*(p_sed_resp_nh4+p_sed_pocn_resp)*theta(t_o2-5.0e-6))*lim_t_o2_2*lim_t_nh4_11 
+                    p_nh4_nitdenit_n2 = (frac_denit_sed*(p_sed_resp_nh4+p_sed_pocn_resp)*theta(t_o2-5.0e-6))*lim_t_nh4_11*lim_t_o2_2 
                     p_nh4_nitdenit_n2 = max(p_nh4_nitdenit_n2,0.0) 
                 
                  
@@ -2520,11 +2526,11 @@ def cgt_bio_timestep():
                     cgt_dummyvar = 0.0
                     lim_t_no3_1          = 0.0 
                     lim_t_no3_3          = 0.0 
-                    lim_t_no3_9          = 0.0 
+                    lim_t_no3_10         = 0.0 
                  
                 if (6 == which_tracer_exhausted):
                     cgt_dummyvar = 0.0
-                    lim_t_po4_10         = 0.0 
+                    lim_t_po4_9          = 0.0 
                  
                 if (7 == which_tracer_exhausted):
                     cgt_dummyvar = 0.0
@@ -2837,10 +2843,7 @@ def cgt_bio_timestep():
             # EXPLICIT MOVEMENT
             vertical_speed_of_t_cya          [k]=(w_cya)/(24*3600.0)   # convert to m/s
             vertical_diffusivity_of_t_cya          [k]=(0.0)          # leave as m2/s
-            ### ~~~ pika-ERGOM ~~~ Sinking speed of detritus modified according to factor based on 
-            ### ~~~ pika-ERGOM ~~~ local strength of thermocline.                     
-            vertical_speed_of_t_det          [k]=(w_det*sink_fac[k])/(24*3600.0)   # convert to m/s
-            ### ~~~~~~~~~~~~~~~~~~
+            vertical_speed_of_t_det          [k]=(w_det)/(24*3600.0)   # convert to m/s
             vertical_diffusivity_of_t_det          [k]=(0.0)          # leave as m2/s
             vertical_speed_of_t_poc          [k]=(w_poc_var)/(24*3600.0)   # convert to m/s
             vertical_diffusivity_of_t_poc          [k]=(0.0)          # leave as m2/s

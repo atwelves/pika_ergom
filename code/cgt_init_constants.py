@@ -192,8 +192,8 @@ def cgt_init_constants():
                            ### ~~~ pika-ERGOM ~~~ Buoyancy (vertical speed +1 m/d) removed to prevent excessive cyanobacteria persistence in autumn.
                            ### ~~~ pika-ERGOM ~~~ ### ~~~ pika-ERGOM ~~~ Kraft et al. (2025): https://doi.org/10.1016/j.hal.2025.102865
     w_cya           = 0.0      
-    global w_det           # vertical speed of detritus [m/day]
-    w_det           = -4.5  
+    global w_det_mixed     # vertical speed of detritus [m/day]
+    w_det_mixed     = -4.5  
     global w_ipw           # vertical speed of suspended iron PO4 [m/day]
     w_ipw           = -1.0     
     global w_det_sedi      # sedimentation velocity (negative for downward) [m/day]

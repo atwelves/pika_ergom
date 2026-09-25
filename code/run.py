@@ -210,9 +210,8 @@ while current_date < repeated_runs*(end_date-start_date)+start_date:
     output_count=output_count+1
     
     # Calculate the thermocline strength dT/dZ for use in sinking speed calculation
-    dTdZ     = np.abs(np.divide(np.diff(forcing_vector_temperature),np.diff(depths)))
-    sink_fac = np.square(1 - np.divide(dTdZ,(dTdZ+K_sink)))
-    sink_fac = np.append(sink_fac,sink_fac[-1])
+    dTdZ     = np.divide(np.diff(forcing_vector_temperature),np.diff(depths))
+    dTdZ     = np.append(dTdZ,0)
     
     # do the biology including vertical migration / particle sinking
     cgt_bio_timestep()
