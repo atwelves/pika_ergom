@@ -661,7 +661,7 @@ def cgt_bio_timestep():
             # Variable detrital sinking speed :
             temp1  = -min(cgt_dTdz,0)               
             temp2  = temp1/(temp1 + K_sink)         
-            temp3  = (1-temp1)*(1-temp1)            
+            temp3  = (1-temp2)*(1-temp2)            
             w_det           = w_det_mixed*temp3              
              
 

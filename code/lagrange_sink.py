@@ -27,7 +27,7 @@ configure_lagrange_sink()
 
 # Run model
 
-def lagrange_sink(model_name,input_date,Kz,sink_fac,mld,bathy,model_dz,model_depths,input_temperature,input_distribution,sinking_speed):
+def lagrange_sink(model_name,input_date,Kz,dTdz,mld,bathy,model_dz,model_depths,input_temperature,input_distribution,sinking_speed,K_sink):
     print('Mixed layer depth: {}'.format(mld))
     input_distribution = np.squeeze(input_distribution[0:np.size(model_depths)])/np.nansum(input_distribution[0:np.size(model_depths)])
     initial_index = np.random.choice(np.size(model_depths), npart, p=input_distribution)
@@ -60,7 +60,12 @@ def lagrange_sink(model_name,input_date,Kz,sink_fac,mld,bathy,model_dz,model_dep
                 else:
                     z[i,t] = z[i,t]
                 # apply sinking rate 
-                z[i,t] = z[i,t] - sinking_speed*sink_fac[index]*(dt/(3600*24))
+                dTdz = -np.clip(dTdz,-1e6,0)
+                # Variable detrital sinking speed :
+                temp2  = dTdz/(dTdz + K_sink)
+                temp3  = (1-temp2)*(1-temp2)
+                w_det           = sinking_speed*temp3
+                z[i,t] = z[i,t] - w_det[index]*(dt/(3600*24))
                 # sedimentation
                 if z[i,t] > bathy:
                     z[i,t] = bathy

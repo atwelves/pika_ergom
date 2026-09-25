@@ -213,16 +213,15 @@ while current_date < repeated_runs*(end_date-start_date)+start_date:
     output_count=output_count+1
 
     # Calculate the thermocline strength dT/dZ for use in sinking speed calculation
-    dTdZ     = np.abs(np.divide(np.diff(forcing_vector_temperature),np.diff(depths)))
-    sink_fac = np.square(1 - np.divide(dTdZ,(dTdZ+K_sink)))
-    sink_fac = np.append(sink_fac,sink_fac[-1])
- 
+    dTdZ     = np.divide(np.diff(forcing_vector_temperature),np.diff(depths))
+    dTdZ     = np.append(dTdZ,0)
+
     if (np.floor(current_date) in release_dates):
         input_date = np.floor(current_date).astype(int)
         print('particle release {}'.format(release_counter+1))
         # do the Lagrangian release experiment
-        particle_tracks = lagrange_sink.lagrange_sink(run_id,input_date,forcing_vector_diffusivity, sink_fac, forcing_scalar_mld, bathy, cellheights, depths, 
-                                                                   forcing_vector_temperature, tracer_vector_t_cya, w_det)
+        particle_tracks = lagrange_sink.lagrange_sink(run_id,input_date,forcing_vector_diffusivity, dTdZ, forcing_scalar_mld, bathy, cellheights, depths, 
+                                                                   forcing_vector_temperature, tracer_vector_t_cya, w_det_mixed, K_sink)
         release_dates[release_counter] = 0
         release_counter = release_counter + 1
 
