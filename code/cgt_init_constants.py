@@ -181,7 +181,7 @@ def cgt_init_constants():
     global temp_min_spp    # lower temperature limit - small-cell phytoplankton [°C]
                            ### ~~~ pika-ERGOM ~~~ Lower temperature limit (10 deg. C) removed to allow for growth of cold-water dinoflagellates.
                            ### ~~~ pika-ERGOM ~~~ Spilling (2007): http://urn.fi/URN:ISBN:978-952-10-3626-2
-    temp_min_spp    = 0.0     
+    temp_min_spp    = 1.0e-6     
     global temp_opt_zoo    # optimal temperature for zooplankton grazing [°C]
                            ### ~~~ pika-ERGOM ~~~ Values of 10 degrees and 15 degrees also tested.
                            ### ~~~ pika-ERGOM ~~~ effect on results very small.
